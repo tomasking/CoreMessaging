@@ -14,9 +14,10 @@ namespace Publisher
             IMessagePublisher messagePublisher = new MessagePublisher(topicClientFactory, serviceBusConfiguration);
 
 
-
-            messagePublisher.Publish(new TestMessage());
-
+            for (int i = 0; i < 10; i++)
+            {
+                messagePublisher.Publish(new TestMessage(i, "Name" + i));
+            }
 
 
             Console.WriteLine("Press any key to exit");
@@ -27,6 +28,12 @@ namespace Publisher
 
     public class TestMessage
     {
+        public TestMessage(int id, string name)
+        {
+            Id = id;
+            Name = name;
+        }
+
         public int Id { get; set; }
 
         public string Name { get; set; }

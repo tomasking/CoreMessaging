@@ -39,7 +39,7 @@
             byte[] mBytes = Encoding.UTF8.GetBytes(str);
             var brokeredMessage = new Message
             {
-                ContentType = "application/vnd.masstransit+json",
+                ContentType = "application/json",
                 MessageId = Guid.NewGuid().ToString(),
                 TimeToLive = _serviceBusConfiguration.MessageTimeToLive,
                 Body = mBytes,
