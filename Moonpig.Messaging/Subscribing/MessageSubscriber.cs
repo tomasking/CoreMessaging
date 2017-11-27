@@ -4,22 +4,40 @@ using System.Text;
 
 namespace Moonpig.Messaging.Subscribing
 {
+    using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Newtonsoft.Json;
 
-    public class ServiceBus
+    public interface IMessageSubscriber: IDisposable
     {
-        private readonly ISubscriptionClient _subscriptionClient;
+        void Subscribe<T>(Action<T> action);
+    }
 
-        public ServiceBus(ISubscriptionClient subscriptionClient)
+    public class MessageSubscriber : IMessageSubscriber
+    {
+        private readonly IServiceBusConfiguration _serviceBusConfiguration;
+        readonly Dictionary<string, SubscriptionClient> _subscriptionClients = new Dictionary<string, SubscriptionClient>();
+
+        public MessageSubscriber(IServiceBusConfiguration serviceBusConfiguration)
         {
-            this._subscriptionClient = subscriptionClient;
+            _serviceBusConfiguration = serviceBusConfiguration;
         }
 
         public void Subscribe<T>(Action<T> action)
         {
+            var topicName = typeof(T).FullName;
+            var subscriptionName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+            var key = $"{topicName}:{subscriptionName}";
+            if (_subscriptionClients.ContainsKey(key))
+            {
+                return;
+            }
+
+            var subscriptionClient = new SubscriptionClient(_serviceBusConfiguration.ConnectionString, topicName, subscriptionName);
+
             var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
             {
                 // Maximum number of Concurrent calls to the callback `ProcessMessagesAsync`, set to 1 for simplicity.
@@ -32,12 +50,21 @@ namespace Moonpig.Messaging.Subscribing
             };
 
             // Register the function that will process messages
-            _subscriptionClient.RegisterMessageHandler((_,__) => ProcessMessagesAsync(_,__, action), messageHandlerOptions);
+            subscriptionClient.RegisterMessageHandler((_, __) => ProcessMessagesAsync(_, __, action), messageHandlerOptions);
+
+            _subscriptionClients.Add(key, subscriptionClient);
         }
 
         public async Task ProcessMessagesAsync<T>(Message message, CancellationToken token, Action<T> action)
         {
-            // Process the message
+
+            var topicName = typeof(T).FullName;
+            var subscriptionName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+            var key = $"{topicName}:{subscriptionName}";
+            if (!_subscriptionClients.ContainsKey(key))
+            {
+                return;
+            }
 
             T obj = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(message.Body));
             action(obj);
@@ -45,7 +72,7 @@ namespace Moonpig.Messaging.Subscribing
 
             // Complete the message so that it is not received again.
             // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is default).
-            await _subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
+            await _subscriptionClients[key].CompleteAsync(message.SystemProperties.LockToken);
 
             // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
             // If subscriptionClient has already been Closed, you may chose to not call CompleteAsync() or AbandonAsync() etc. calls 
@@ -62,6 +89,14 @@ namespace Moonpig.Messaging.Subscribing
             Console.WriteLine($"- Entity Path: {context.EntityPath}");
             Console.WriteLine($"- Executing Action: {context.Action}");
             return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            foreach (var subscriptionClient in _subscriptionClients)
+            {
+                subscriptionClient.Value.CloseAsync().Wait();
+            }
         }
     }
 }

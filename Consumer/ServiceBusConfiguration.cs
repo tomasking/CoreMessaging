@@ -1,8 +1,8 @@
-﻿namespace Consumer
+﻿namespace Moonpig.Messaging.Consumer
 {
     using System;
+    using Messaging;
     using Microsoft.Extensions.Configuration;
-    using Moonpig.Messaging;
 
     public class ServiceBusConfiguration : IServiceBusConfiguration
     {

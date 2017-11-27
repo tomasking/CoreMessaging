@@ -1,35 +1,42 @@
-﻿namespace Moonpig.Messaging
+﻿namespace Moonpig.Messaging.Publishing
 {
     using System;
+    using System.Collections.Generic;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
 
-    public interface IMessagePublisher
+    public interface IMessagePublisher : IDisposable
     {
         Task Publish<T>(T message);
     }
 
-    public class MessagePublisher : IDisposable, IMessagePublisher
+    public class MessagePublisher : IMessagePublisher
     {
-        private readonly ITopicClientFactory _topicClientFactory;
         private readonly IServiceBusConfiguration _serviceBusConfiguration;
         private readonly JsonSerializerSettings _jsonSerializerSettings;
-        private ITopicClient _topicClient;
+        readonly Dictionary<string, ITopicClient> _topicClients;
 
-        public MessagePublisher(ITopicClientFactory topicClientFactory, IServiceBusConfiguration serviceBusConfiguration)
+        public MessagePublisher(IServiceBusConfiguration serviceBusConfiguration)
         {
-            _topicClientFactory = topicClientFactory;
             _serviceBusConfiguration = serviceBusConfiguration;
             _jsonSerializerSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+            _topicClients = new Dictionary<string, ITopicClient>();
         }
 
         public async Task Publish<T>(T message)
         {
+            var topicName = typeof(T).FullName;
+            if (!_topicClients.TryGetValue(topicName, out var topicClient))
+            {
+                topicClient = Create(topicName);
+                _topicClients.Add(topicName, topicClient);
+            }
+
             var brokeredMessage = BuildBrokeredMessage(message);
-            await TopicClient.SendAsync(brokeredMessage);
+            await topicClient.SendAsync(brokeredMessage);
         }
 
         private Message BuildBrokeredMessage<T>(T message)
@@ -50,19 +57,21 @@
 
         public void Dispose()
         {
-            TopicClient.CloseAsync();
+            foreach (var topicClient in _topicClients)
+            {
+                topicClient.Value.CloseAsync();
+            }
         }
 
-        private ITopicClient TopicClient
+        private ITopicClient Create(string topicName)
         {
-            get
-            {
-                if (_topicClient == null)
-                {
-                    _topicClient = _topicClientFactory.Create();
-                }
-                return _topicClient;
-            }
+            RetryExponential retryPolicy = new RetryExponential(_serviceBusConfiguration.RetryPolicyMinimumBackoff,
+                _serviceBusConfiguration.RetryPolicyMaximumBackoff,
+                _serviceBusConfiguration.RetryPolicyMaximumRetryCount);
+
+            var topicClient = new TopicClient(_serviceBusConfiguration.ConnectionString, topicName, retryPolicy);
+
+            return topicClient;
         }
     }
 }

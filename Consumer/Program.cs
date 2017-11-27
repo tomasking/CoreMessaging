@@ -1,12 +1,9 @@
-﻿namespace Consumer
+﻿namespace Moonpig.Messaging.Consumer
 {
     using System;
-    using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
     using Microsoft.Extensions.Configuration;
-    using Moonpig.Messaging.Subscribing;
+    using Subscribing;
 
     class Program
     {
@@ -19,15 +16,13 @@
         {
             var config = new ServiceBusConfiguration(new ConfigurationBuilder());
 
-            var subscriptionClient = new SubscriptionClient(config.ConnectionString, config.TopicName, "test");
-            
-            ServiceBus serviceBus =new ServiceBus(subscriptionClient);
+            IServiceBus serviceBus = new ServiceBus(config);
 
-           serviceBus.Subscribe<TestMessage>(DoSomething);
+            serviceBus.Subscribe<TestMessage>(DoSomething);
 
             Console.ReadKey();
 
-            await subscriptionClient.CloseAsync();
+            serviceBus.Dispose();
         }
 
         private static void DoSomething(TestMessage obj)
