@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Moonpig.Messaging.Subscribing
+﻿namespace Messaging.Subscribing
 {
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
-    using Newtonsoft.Json;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Reflection;
+	using System.Text;
+	using System.Threading;
+	using System.Threading.Tasks;
+	using Microsoft.Azure.ServiceBus;
+	using Newtonsoft.Json;
 
-    public interface IMessageSubscriber: IDisposable
+	public interface IMessageSubscriber: IDisposable
     {
         void Subscribe<T>(Action<T> action);
     }

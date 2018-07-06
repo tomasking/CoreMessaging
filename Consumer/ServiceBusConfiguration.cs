@@ -1,10 +1,10 @@
-﻿namespace Moonpig.Messaging.Consumer
+﻿namespace Messaging.Consumer
 {
-    using System;
-    using Messaging;
-    using Microsoft.Extensions.Configuration;
+	using System;
+	using Messaging;
+	using Microsoft.Extensions.Configuration;
 
-    public class ServiceBusConfiguration : IServiceBusConfiguration
+	public class ServiceBusConfiguration : IServiceBusConfiguration
     {
         protected readonly IConfiguration Configuration;
 
@@ -20,7 +20,7 @@
             get
             {
 #if DEBUG
-                var serviceBusConnectionString = Environment.GetEnvironmentVariable("MNP-Skywalker.ESB.PrimaryConnection");
+                var serviceBusConnectionString = Environment.GetEnvironmentVariable("ServiceBusPrimaryConnection");
                 if (serviceBusConnectionString != null)
                 {
                     return serviceBusConnectionString;

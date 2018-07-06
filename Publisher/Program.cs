@@ -1,12 +1,9 @@
-﻿using System;
-
-namespace Publisher
+﻿namespace Messaging.Publisher
 {
-    using Microsoft.Extensions.Configuration;
-    using Moonpig.Messaging;
-    using Moonpig.Messaging.Consumer;
+	using System;
+	using Microsoft.Extensions.Configuration;
 
-    class Program
+	class Program
     {
         static void Main(string[] args)
         {

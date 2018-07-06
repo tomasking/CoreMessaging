@@ -1,14 +1,14 @@
-﻿namespace Moonpig.Messaging.Publishing
+﻿namespace Messaging.Publishing
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
+	using System;
+	using System.Collections.Generic;
+	using System.Text;
+	using System.Threading.Tasks;
+	using Microsoft.Azure.ServiceBus;
+	using Newtonsoft.Json;
+	using Newtonsoft.Json.Serialization;
 
-    public interface IMessagePublisher : IDisposable
+	public interface IMessagePublisher : IDisposable
     {
         Task Publish<T>(T message);
     }

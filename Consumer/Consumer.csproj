@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyName>Moonpig.Messaging.Consumer</AssemblyName>
-    <RootNamespace>Moonpig.Messaging.Consumer</RootNamespace>
+    <AssemblyName>Messaging.Consumer</AssemblyName>
+    <RootNamespace>Messaging.Consumer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Moonpig.Messaging\Moonpig.Messaging.csproj" />
+    <ProjectReference Include="..\Messaging\Messaging.csproj" />
   </ItemGroup>
 
 </Project>

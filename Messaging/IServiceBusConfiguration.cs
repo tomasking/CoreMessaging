@@ -1,8 +1,8 @@
-﻿namespace Moonpig.Messaging
+﻿namespace Messaging
 {
-    using System;
+	using System;
 
-    public interface IServiceBusConfiguration
+	public interface IServiceBusConfiguration
     {
         string ConnectionString { get; }
 

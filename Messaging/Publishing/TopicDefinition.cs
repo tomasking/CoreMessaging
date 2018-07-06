@@ -1,4 +1,4 @@
-﻿namespace Moonpig.Messaging.Publishing
+﻿namespace Messaging.Publishing
 {
     public class TopicDefinition
     {

@@ -1,4 +1,4 @@
-﻿namespace Moonpig.Messaging.Consumer
+﻿namespace Messaging.Publisher
 {
     public class TestMessage
     {

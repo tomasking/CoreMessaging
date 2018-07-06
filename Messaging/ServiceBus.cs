@@ -1,10 +1,10 @@
-﻿namespace Moonpig.Messaging
+﻿namespace Messaging
 {
-    using System;
-    using Publishing;
-    using Subscribing;
+	using System;
+	using Publishing;
+	using Subscribing;
 
-    public interface IServiceBus : IDisposable
+	public interface IServiceBus : IDisposable
     {
         void Subscribe<T>(Action<T> action);
         void Publish<T>(T testMessage);

@@ -1,11 +1,11 @@
-﻿namespace Moonpig.Messaging.Consumer
+﻿namespace Messaging.Consumer
 {
-    using System;
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
-    using Subscribing;
+	using System;
+	using System.Threading.Tasks;
+	using Messaging;
+	using Microsoft.Extensions.Configuration;
 
-    class Program
+	class Program
     {
         static void Main(string[] args)
         {
